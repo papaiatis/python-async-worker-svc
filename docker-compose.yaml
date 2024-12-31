@@ -1,0 +1,45 @@
+services:
+  redis:
+    container_name: redis
+    image: redis:7.4.1
+    ports:
+      - '6379:6379'
+    restart: always
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  pubsub:
+    image: gcr.io/google.com/cloudsdktool/google-cloud-cli:489.0.0-emulators
+    container_name: pubsub
+    restart: on-failure
+    ports:
+      - '8085:8085'
+    expose:
+      - '8085'
+    environment:
+      - INSTALL_COMPONENTS=google-cloud-sdk-pubsub-emulator
+    entrypoint: gcloud beta emulators pubsub start --project local0 --host-port 0.0.0.0:8085
+    healthcheck:
+      test: [ 'CMD', 'curl', '-f', 'http://0.0.0.0:8085' ]
+
+  pubsub-init:
+    build:
+      context: scripts/pubsub-init
+    container_name: pubsub-init
+    command: /bin/sh -c "/config/init.sh"
+    environment:
+      PUBSUB_EMULATOR_HOST: 'pubsub:8085'
+      CLOUDSDK_API_ENDPOINT_OVERRIDES_PUBSUB: 'http://pubsub:8085'
+    volumes:
+      - ./scripts/pubsub-init/:/config
+    depends_on:
+      pubsub:
+        condition: service_healthy
+volumes:
+  redis-data:
+    driver: local

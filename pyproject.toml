@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "async-worker-svc"
+version = "0.1.0"
+description = ""
+authors = ["Attila Papai <papaiatis@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.13"
+pydantic = "^2.10.4"
+pydantic-settings = "^2.7.0"
+loguru = "^0.7.3"
+google-cloud-pubsub = "^2.27.1"
+flask = "^3.1.0"
+gevent = "^24.11.1"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.10.0"
+pytest = "^8.3.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+worker = "async_worker_svc.main:main"
+
+[tool.black]
+line-length = 120
